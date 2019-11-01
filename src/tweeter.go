@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/abiosoft/ishell"
 	"github.com/hernancabral/Twiteer/src/domain"
 	"github.com/hernancabral/Twiteer/src/service"
@@ -11,6 +13,7 @@ func main() {
 	shell := ishell.New()
 	shell.SetPrompt("Tweeter >> ")
 	shell.Print("Type 'help' to know commands\n")
+	service.InitializeService()
 
 	shell.AddCmd(&ishell.Cmd{
 		Name: "publishTweet",
@@ -27,7 +30,7 @@ func main() {
 
 			tweetText := c.ReadLine()
 
-			err := service.PublishTweet(domain.NewTweet(tweetUser, tweetText))
+			_, err := service.PublishTweet(domain.NewTweet(tweetUser, tweetText))
 
 			if err != nil {
 				c.Print("Error: ", err.Error(), "\n")
@@ -49,6 +52,69 @@ func main() {
 			tweet := service.GetLastTweet()
 
 			c.Println("Usuario: ", tweet.User, "\nTexto: ", tweet.Text, " A las: ", tweet.Date)
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "showTweetById",
+		Help: "Shows a tweet by Id",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write the id: ")
+
+			tweetId, _ := strconv.Atoi(c.ReadLine())
+
+			id, _ := service.GetTweetById(tweetId)
+
+			tweet := service.GetTweets()[id]
+
+			c.Println("Usuario: ", tweet.User, "\nTexto: ", tweet.Text, " A las: ", tweet.Date)
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "howManyTweetsByUser",
+		Help: "Shows a tweet by Id",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write the user name: ")
+
+			user := c.ReadLine()
+
+			count := service.CountTweetsByUser(user)
+
+			c.Println("El usuario: ", user, " twiteo ", count, " veces")
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "showUserTweets",
+		Help: "Shows a tweet by Id",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Write the user name: ")
+
+			user := c.ReadLine()
+
+			tweets := service.GetTweetsByUser(user)
+
+			c.Println("Usuario: ", user, "\n")
+
+			for i := 0; i < len(tweets); i++ {
+				c.Println("Texto: ", tweets[i].Text, " A las: ", tweets[i].Date)
+			}
 
 			return
 		},
