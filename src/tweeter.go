@@ -46,9 +46,26 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := service.GetTweet()
+			tweet := service.GetLastTweet()
 
 			c.Println("Usuario: ", tweet.User, "\nTexto: ", tweet.Text, " A las: ", tweet.Date)
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "showTweets",
+		Help: "Shows all tweets",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			tweets := service.GetTweets()
+
+			for i := 0; i < len(tweets); i++ {
+				c.Println("Usuario: ", tweets[i].User, "\nTexto: ", tweets[i].Text, " A las: ", tweets[i].Date)
+			}
 
 			return
 		},

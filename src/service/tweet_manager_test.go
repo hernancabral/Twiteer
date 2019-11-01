@@ -13,6 +13,7 @@ import (
 func TestPublishedTweetIsSaved(t *testing.T) {
 
 	// Initialization
+	service.InitializeService()
 	var tweet *domain.Tweet
 	user := "grupoesfera"
 	text := "This is my first tweet"
@@ -22,7 +23,7 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 	service.PublishTweet(tweet)
 
 	// Validation
-	publishedTweet := service.GetTweet()
+	publishedTweet := service.GetLastTweet()
 	assert.Equal(t, user, publishedTweet.User)
 	assert.Equal(t, text, publishedTweet.Text)
 	assert.NotNil(t, publishedTweet.Date)
@@ -31,6 +32,7 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 
 	// Initialization
+	service.InitializeService()
 	var tweet *domain.Tweet
 
 	var user string
@@ -49,6 +51,7 @@ func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 
 	// Initialization
+	service.InitializeService()
 	var tweet *domain.Tweet
 
 	var text string
@@ -66,6 +69,7 @@ func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 
 func TestTweetCanNotHaveMoreThan140Chars(t *testing.T) {
 	// Initialization
+	service.InitializeService()
 	var tweet *domain.Tweet
 
 	user := "TestUser"
@@ -79,4 +83,28 @@ func TestTweetCanNotHaveMoreThan140Chars(t *testing.T) {
 
 	// Validation
 	assert.EqualError(t, err, "too many characters", "Expected error is too many characters")
+}
+
+func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
+	// Initialization
+	service.InitializeService()
+	var tweet, secondTweet *domain.Tweet // Fill the tweets with data
+	tweet = domain.NewTweet("Usuario", "texto1")
+	secondTweet = domain.NewTweet("Usuario", "texto2")
+
+	// Operation
+	service.PublishTweet(tweet)
+	service.PublishTweet(secondTweet)
+
+	// Validation
+	publishedTweets := service.GetTweets()
+	assert.EqualValues(t, 2, len(publishedTweets))
+
+	firstPublishedTweet := publishedTweets[0]
+	secondPublishedTweet := publishedTweets[1]
+
+	assert.EqualValues(t, "Usuario", firstPublishedTweet.User)
+	assert.EqualValues(t, "texto1", firstPublishedTweet.Text)
+	assert.EqualValues(t, "Usuario", secondPublishedTweet.User)
+	assert.EqualValues(t, "texto2", secondPublishedTweet.Text)
 }

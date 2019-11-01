@@ -7,6 +7,11 @@ import (
 )
 
 var Tweet *domain.Tweet
+var Tweets []*domain.Tweet
+
+func InitializeService() {
+	Tweets = make([]*domain.Tweet, 0)
+}
 
 func PublishTweet(tweet *domain.Tweet) error {
 	var err error
@@ -14,7 +19,7 @@ func PublishTweet(tweet *domain.Tweet) error {
 		if len([]rune(tweet.Text)) > 140 {
 			return fmt.Errorf("too many characters")
 		}
-		Tweet = tweet
+		Tweets = append(Tweets, tweet)
 		return err
 	} else {
 		if tweet.User == "" {
@@ -25,6 +30,10 @@ func PublishTweet(tweet *domain.Tweet) error {
 	}
 }
 
-func GetTweet() *domain.Tweet {
-	return Tweet
+func GetTweets() []*domain.Tweet {
+	return Tweets
+}
+
+func GetLastTweet() *domain.Tweet {
+	return GetTweets()[len(GetTweets())-1]
 }
