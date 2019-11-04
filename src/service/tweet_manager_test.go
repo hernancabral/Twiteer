@@ -13,36 +13,36 @@ import (
 func TestPublishedTweetIsSaved(t *testing.T) {
 
 	// Initialization
-	service.InitializeService()
-	var tweet *domain.Tweet
+	tm := service.NewTweetManager()
+	var tweet *domain.TextTweet
 	user := "grupoesfera"
 	text := "This is my first tweet"
-	tweet = domain.NewTweet(user, text)
+	tweet = domain.NewTextTweet(user, text)
 
 	// Operation
-	service.PublishTweet(tweet)
+	tm.PublishTweet(tweet)
 
 	// Validation
-	publishedTweet := service.GetLastTweet()
-	assert.Equal(t, user, publishedTweet.User)
-	assert.Equal(t, text, publishedTweet.Text)
-	assert.NotNil(t, publishedTweet.Date)
+	publishedTweet := tm.GetLastTweet()
+	assert.Equal(t, user, publishedTweet.GetUser())
+	assert.Equal(t, text, publishedTweet.GetText())
+	assert.NotNil(t, publishedTweet.GetDate())
 }
 
 func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 
 	// Initialization
-	service.InitializeService()
-	var tweet *domain.Tweet
+	tm := service.NewTweetManager()
+	var tweet *domain.TextTweet
 
 	var user string
 	text := "This is my first tweet"
 
-	tweet = domain.NewTweet(user, text)
+	tweet = domain.NewTextTweet(user, text)
 
 	// Operation
 	var err error
-	_, err = service.PublishTweet(tweet)
+	_, err = tm.PublishTweet(tweet)
 
 	// Validation
 	assert.EqualError(t, err, "user is required", "Expected error is user is required")
@@ -51,17 +51,17 @@ func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 
 	// Initialization
-	service.InitializeService()
-	var tweet *domain.Tweet
+	tm := service.NewTweetManager()
+	var tweet *domain.TextTweet
 
 	var text string
 	user := "TestUser"
 
-	tweet = domain.NewTweet(user, text)
+	tweet = domain.NewTextTweet(user, text)
 
 	// Operation
 	var err error
-	_, err = service.PublishTweet(tweet)
+	_, err = tm.PublishTweet(tweet)
 
 	// Validation
 	assert.EqualError(t, err, "text is required", "Expected error is text is required")
@@ -69,17 +69,17 @@ func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 
 func TestTweetCanNotHaveMoreThan140Chars(t *testing.T) {
 	// Initialization
-	service.InitializeService()
-	var tweet *domain.Tweet
+	tm := service.NewTweetManager()
+	var tweet *domain.TextTweet
 
 	user := "TestUser"
 	text := "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta."
 
-	tweet = domain.NewTweet(user, text)
+	tweet = domain.NewTextTweet(user, text)
 
 	// Operation
 	var err error
-	_, err = service.PublishTweet(tweet)
+	_, err = tm.PublishTweet(tweet)
 
 	// Validation
 	assert.EqualError(t, err, "too many characters", "Expected error is too many characters")
@@ -87,71 +87,71 @@ func TestTweetCanNotHaveMoreThan140Chars(t *testing.T) {
 
 func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
 	// Initialization
-	service.InitializeService()
-	var tweet, secondTweet *domain.Tweet // Fill the tweets with data
-	tweet = domain.NewTweet("Usuario", "texto1")
-	secondTweet = domain.NewTweet("Usuario", "texto2")
+	tm := service.NewTweetManager()
+	var tweet, secondTweet *domain.TextTweet // Fill the tweets with data
+	tweet = domain.NewTextTweet("Usuario", "texto1")
+	secondTweet = domain.NewTextTweet("Usuario", "texto2")
 
 	// Operation
-	service.PublishTweet(tweet)
-	service.PublishTweet(secondTweet)
+	tm.PublishTweet(tweet)
+	tm.PublishTweet(secondTweet)
 
 	// Validation
-	publishedTweets := service.GetTweets()
+	publishedTweets := tm.GetTweets()
 	assert.EqualValues(t, 2, len(publishedTweets))
 
 	firstPublishedTweet := publishedTweets[0]
 	secondPublishedTweet := publishedTweets[1]
 
-	assert.EqualValues(t, "Usuario", firstPublishedTweet.User)
-	assert.EqualValues(t, "texto1", firstPublishedTweet.Text)
-	assert.EqualValues(t, "Usuario", secondPublishedTweet.User)
-	assert.EqualValues(t, "texto2", secondPublishedTweet.Text)
+	assert.EqualValues(t, "Usuario", firstPublishedTweet.GetUser())
+	assert.EqualValues(t, "texto1", firstPublishedTweet.GetText())
+	assert.EqualValues(t, "Usuario", secondPublishedTweet.GetUser())
+	assert.EqualValues(t, "texto2", secondPublishedTweet.GetText())
 }
 
 func TestCanRetrieveTweetById(t *testing.T) {
 
 	// Initialization
-	service.InitializeService()
+	tm := service.NewTweetManager()
 
-	var tweet *domain.Tweet
+	var tweet *domain.TextTweet
 	var id int
 
 	user := "grupoesfera"
 	text := "This is my first tweet"
 
-	tweet = domain.NewTweet(user, text)
+	tweet = domain.NewTextTweet(user, text)
 
 	// Operation
-	id, _ = service.PublishTweet(tweet)
+	id, _ = tm.PublishTweet(tweet)
 
 	// Validation
-	publishedTweet, _ := service.GetTweetById(id)
+	publishedTweet, _ := tm.GetTweetById(id)
 
 	//isValidTweet(t, publishedTweet, id, user, text)
 
-	assert.Equal(t, id, service.GetTweets()[publishedTweet].Id)
-	assert.Equal(t, user, service.GetTweets()[publishedTweet].User)
-	assert.Equal(t, text, service.GetTweets()[publishedTweet].Text)
+	assert.Equal(t, id, tm.GetTweets()[publishedTweet].GetId())
+	assert.Equal(t, user, tm.GetTweets()[publishedTweet].GetUser())
+	assert.Equal(t, text, tm.GetTweets()[publishedTweet].GetText())
 
 }
 
 func TestCanCountTheTweetsSentByAnUser(t *testing.T) {
 	// Initialization
-	service.InitializeService()
-	var tweet, secondTweet, thirdTweet *domain.Tweet
+	tm := service.NewTweetManager()
+	var tweet, secondTweet, thirdTweet *domain.TextTweet
 	user := "grupoesfera"
 	anotherUser := "nick"
 	text := "This is my first tweet"
 	secondText := "This is my second tweet"
-	tweet = domain.NewTweet(user, text)
-	secondTweet = domain.NewTweet(user, secondText)
-	thirdTweet = domain.NewTweet(anotherUser, text)
-	service.PublishTweet(tweet)
-	service.PublishTweet(secondTweet)
-	service.PublishTweet(thirdTweet)
+	tweet = domain.NewTextTweet(user, text)
+	secondTweet = domain.NewTextTweet(user, secondText)
+	thirdTweet = domain.NewTextTweet(anotherUser, text)
+	tm.PublishTweet(tweet)
+	tm.PublishTweet(secondTweet)
+	tm.PublishTweet(thirdTweet)
 	// Operation
-	count := service.CountTweetsByUser(user)
+	count := tm.CountTweetsByUser(user)
 	// Validation
 	if count != 2 {
 		t.Errorf("Expected count is 2 but was %d", count)
@@ -160,22 +160,22 @@ func TestCanCountTheTweetsSentByAnUser(t *testing.T) {
 
 func TestCanRetrieveTheTweetsSentByAnUser(t *testing.T) {
 	// Initialization
-	service.InitializeService()
-	var tweet, secondTweet, thirdTweet *domain.Tweet
+	tm := service.NewTweetManager()
+	var tweet, secondTweet, thirdTweet *domain.TextTweet
 	user := "grupoesfera"
 	anotherUser := "nick"
 	text := "This is my first tweet"
 	secondText := "This is my second tweet"
-	tweet = domain.NewTweet(user, text)
-	secondTweet = domain.NewTweet(user, secondText)
-	thirdTweet = domain.NewTweet(anotherUser, text)
+	tweet = domain.NewTextTweet(user, text)
+	secondTweet = domain.NewTextTweet(user, secondText)
+	thirdTweet = domain.NewTextTweet(anotherUser, text)
 	// publish the 3 tweets
-	service.PublishTweet(tweet)
-	service.PublishTweet(secondTweet)
-	service.PublishTweet(thirdTweet)
+	tm.PublishTweet(tweet)
+	tm.PublishTweet(secondTweet)
+	tm.PublishTweet(thirdTweet)
 
 	// Operation
-	tweets := service.GetTweetsByUser(user)
+	tweets := tm.GetTweetsByUser(user)
 
 	// Validation
 	assert.Equal(t, 2, len(tweets))
@@ -185,10 +185,66 @@ func TestCanRetrieveTheTweetsSentByAnUser(t *testing.T) {
 
 	// check if isValidTweet for firstPublishedTweet and secondPublishedTweet
 
-	assert.Equal(t, user, firstPublishedTweet.User)
-	assert.Equal(t, text, firstPublishedTweet.Text)
+	assert.Equal(t, user, firstPublishedTweet.GetUser())
+	assert.Equal(t, text, firstPublishedTweet.GetText())
 
-	assert.Equal(t, user, secondPublishedTweet.User)
-	assert.Equal(t, secondText, secondPublishedTweet.Text)
+	assert.Equal(t, user, secondPublishedTweet.GetUser())
+	assert.Equal(t, secondText, secondPublishedTweet.GetText())
 
+}
+
+func TestTextTweetPrintsUserAndText(t *testing.T) {
+
+	// Initialization
+	tweet := domain.NewTextTweet("grupoesfera", "This is my tweet")
+
+	// Operation
+	text := tweet.PrintableTweet()
+
+	// Validation
+	expectedText := "@grupoesfera: This is my tweet"
+	assert.Equal(t, expectedText, text)
+}
+
+func TestCanGetAStringFromATweet(t *testing.T) {
+
+	// Initialization
+	tweet := domain.NewTextTweet("grupoesfera", "This is my tweet")
+
+	// Operation
+	text := tweet.String()
+
+	// Validation
+	expectedText := "@grupoesfera: This is my tweet"
+	assert.Equal(t, expectedText, text)
+
+}
+
+func TestImageTweetPrintsUserTextAndImageURL(t *testing.T) {
+
+	// Initialization
+	tweet := domain.NewImageTweet("grupoesfera", "This is my image",
+		"http://www.grupoesfera.com.ar/common/img/grupoesfera.png")
+
+	// Operation
+	text := tweet.PrintableTweet()
+
+	// Validation
+	expectedText := "@grupoesfera: This is my image http://www.grupoesfera.com.ar/common/img/grupoesfera.png"
+	assert.Equal(t, expectedText, text)
+
+}
+
+func TestQuoteTweetPrintsUserTextAndQuotedTweet(t *testing.T) {
+
+	// Initialization
+	quotedTweet := domain.NewTextTweet("grupoesfera", "This is my tweet")
+	tweet := domain.NewQuoteTweet("nick", "Awesome", quotedTweet)
+
+	// Operation
+	text := tweet.PrintableTweet()
+
+	// Validation
+	expectedText := `@nick: Awesome "@grupoesfera: This is my tweet"`
+	assert.Equal(t, expectedText, text)
 }

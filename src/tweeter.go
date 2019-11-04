@@ -13,7 +13,7 @@ func main() {
 	shell := ishell.New()
 	shell.SetPrompt("Tweeter >> ")
 	shell.Print("Type 'help' to know commands\n")
-	service.InitializeService()
+	tm := service.NewTweetManager()
 
 	shell.AddCmd(&ishell.Cmd{
 		Name: "publishTweet",
@@ -30,7 +30,7 @@ func main() {
 
 			tweetText := c.ReadLine()
 
-			_, err := service.PublishTweet(domain.NewTweet(tweetUser, tweetText))
+			_, err := tm.PublishTweet(domain.NewTweet(tweetUser, tweetText))
 
 			if err != nil {
 				c.Print("Error: ", err.Error(), "\n")
@@ -49,7 +49,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := service.GetLastTweet()
+			tweet := tm.GetLastTweet()
 
 			c.Println("Usuario: ", tweet.User, "\nTexto: ", tweet.Text, " A las: ", tweet.Date)
 
@@ -68,9 +68,9 @@ func main() {
 
 			tweetId, _ := strconv.Atoi(c.ReadLine())
 
-			id, _ := service.GetTweetById(tweetId)
+			id, _ := tm.GetTweetById(tweetId)
 
-			tweet := service.GetTweets()[id]
+			tweet := tm.GetTweets()[id]
 
 			c.Println("Usuario: ", tweet.User, "\nTexto: ", tweet.Text, " A las: ", tweet.Date)
 
@@ -89,7 +89,7 @@ func main() {
 
 			user := c.ReadLine()
 
-			count := service.CountTweetsByUser(user)
+			count := tm.CountTweetsByUser(user)
 
 			c.Println("El usuario: ", user, " twiteo ", count, " veces")
 
@@ -108,7 +108,7 @@ func main() {
 
 			user := c.ReadLine()
 
-			tweets := service.GetTweetsByUser(user)
+			tweets := tm.GetTweetsByUser(user)
 
 			c.Println("Usuario: ", user, "\n")
 
@@ -127,7 +127,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweets := service.GetTweets()
+			tweets := tm.GetTweets()
 
 			for i := 0; i < len(tweets); i++ {
 				c.Println("Usuario: ", tweets[i].User, "\nTexto: ", tweets[i].Text, " A las: ", tweets[i].Date)
